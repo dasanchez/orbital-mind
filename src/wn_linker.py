@@ -39,9 +39,17 @@ def generate_word_dict(word_set):
 
 def clean_links(word, candidate, is_definition = False):
     # build list of acceptable candidates
-    fillers = ['a', 'an', 'the', 'or', 'with', 'or', 'to', 'for', 'of',
+    fillers = ['a', 'an', 'or', 'with', 'or', 'to', 'for', 'of',
                'as', 'and', 'very', 'in', 'on', 'who', 'is', 'are',
                'rather']
+    if is_definition:
+        fillers.extend(['rather', 'used', 'part', 'inside', 'than', 'from', 'one',
+                        'especially', 'no', 'containing', 'which', 'the', 'when', 'that',
+                        'by', 'per', 'acts', 'some', 'causing', 'make', 'put', 'get',
+                        'involving', 'general', 'distinctive', 'all', 'your', 'how',
+                        'appear', 'you', 'we', 'can', 'be', 'considered', 'separately',
+                        'terms', 'out', 'set', 'off', 'if', 'may', 'like'])
+        # print(fillers)
     raw_list = []
     word = word.lower()
     candidate = candidate.lower()
@@ -195,7 +203,7 @@ def collect_link_data(src_collection, word):
                     definition = definition.replace(',', '')
                     definition = definition.replace(';', '')
                     for def_word in definition.split():
-                        for term in clean_links(word, def_word):
+                        for term in clean_links(word, def_word, is_definition=True):
                             if term and term not in word_list:
                                 link_dict = {'link': term,
                                              'synset': synset['id'],
@@ -255,8 +263,8 @@ hints_collection = db['hints']
         # links = aggregate_links(wordnet_collection, links_collection, k)
         # pprint(links)
 
-test_list = ['light', 'school', 'sun', 'dad', 'acre', 'world', 'trip', 'punk', 'mom', 'ice']
-# test_list = ['ice']
+# test_list = ['light', 'school', 'sun', 'dad', 'acre', 'world', 'trip', 'punk', 'mom', 'ice', 'rib']
+test_list = ['rib']
 for test_word in test_list:
     print(f"Links for {test_word}:")
     hints = aggregate_links(wordnet_collection, hints_collection, test_word)
