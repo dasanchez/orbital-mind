@@ -55,7 +55,6 @@ def collect_word_data(word, type='n'):
         return word_dict
     return False
 
-
 # open database
 client = MongoClient()
 db = client['orbital-db']
@@ -66,18 +65,20 @@ wordfile = open("src/or_words.txt", 'r')
 words = [line.strip().lower() for line in wordfile]
 
 eval_types = ['n', 'v', 'a', 'r']
+new_words = 0
+new_entries = 0
 for word in words:
-    print(f"Looking up {word}...")
-    for eval_type in eval_types:
-        synset = collect_word_data(word, eval_type)
-        if synset:
-            # if eval_type is 'n':
-            #     print('\tSaving noun data.')
-            # elif eval_type is 'v':
-            #     print('\tFound verb data.')
-            # elif eval_type is 'a':
-            #     print('\tFound adjective data.')
-            # elif eval_type is 'r':
-            #     print('\tFound adverb data.')
-            synset_collection.insert_one(synset)
-print("Done.")
+    # print(f"Looking up {word}...")
+    if not synset_collection.count_documents({'word':word}):
+        print(f"Word '{word}' not found in database.")
+        new_words += 1
+        for eval_type in eval_types:
+            synset = collect_word_data(word, eval_type)
+            if synset:
+                print(f"Inserting new entry: {word}, {eval_type}")
+                synset_collection.insert_one(synset)
+                new_entries += 1
+if new_words:
+    print(f"Found {new_words} new words, registered {new_entries}.")
+else:
+    print("Done.")

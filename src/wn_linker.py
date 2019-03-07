@@ -41,70 +41,76 @@ def clean_links(word, candidate, is_definition = False):
     # build list of acceptable candidates
     fillers = ['a', 'an', 'or', 'with', 'or', 'to', 'for', 'of',
                'as', 'and', 'very', 'in', 'on', 'who', 'is', 'are',
-               'rather']
+               'rather', 'the', 'it', 'at']
     if is_definition:
         fillers.extend(['rather', 'used', 'part', 'inside', 'than', 'from', 'one',
-                        'especially', 'no', 'containing', 'which', 'the', 'when', 'that',
+                        'especially', 'no', 'containing', 'which', 'when', 'that',
                         'by', 'per', 'acts', 'some', 'causing', 'make', 'put', 'get',
                         'involving', 'general', 'distinctive', 'all', 'your', 'how',
                         'appear', 'you', 'we', 'can', 'be', 'considered', 'separately',
-                        'terms', 'out', 'set', 'off', 'if', 'may', 'like'])
-        # print(fillers)
+                        'terms', 'out', 'set', 'off', 'if', 'may', 'like', 'any', 'more',
+                        'including', 'resembling', 'true', 'toward', 'similar', 'most', 
+                        'form', 'etc.', 'such', 'ones', 'exhibited', 'exhibiting', 'characterized',
+                        'markedly', 'forth', 'two', 'something', 'consisting', 'holding',
+                        'produced', 'removed', 'so', 'about', 'has', 'been', 'loosely',
+                        'without', 'displaying', 'possessing', 'brightly', 'able', 'others',
+                        'high', 'low', 'other', 'around', 'do', 'needed', 'during', 'usually',
+                        'but', 'term', 'probably', 'derived', 'not', 'this', 'concern', 'being',
+                        'designed', 'example', 'answering', 'performing', 'closely', 'strictly',
+                        'either', 'while', 'bring', 'put'])
+
     raw_list = []
     word = word.lower()
     candidate = candidate.lower()
-    # print(f"word: {word}, candidate: {candidate}")
+
     if ' ' in candidate:
-        # split words into list
-        raw_list = candidate.split(' ')
-        if word in raw_list:
-            del raw_list[raw_list.index(word)]
+        raw_list.extend([term for term in candidate.split(' ') if term not in raw_list])
         for term in raw_list:
-            if word in term:
+            if '-' in term:
+                raw_list.extend(term.split('-'))
                 del raw_list[raw_list.index(term)]
-            if len(term) <= 2:
-                del raw_list[raw_list.index(term)]
-    
     elif '-' in candidate:
-        # split words into list
-        raw_list = candidate.split('-')
-        if word in raw_list:
-            del raw_list[raw_list.index(word)]
-        for term in raw_list:
-            if len(term) <= 2:
-                del raw_list[raw_list.index(term)]
-
-    elif word in candidate:
-        # word is contained in the candidate
-        raw_list = [candidate.replace(word,'')]
-        for  term in raw_list:
-            if len(term) <= 2:
-                del raw_list[raw_list.index(term)]
-        if 'age' in raw_list:
-            del raw_list[raw_list.index('age')]
-        if 'ing' in raw_list:
-            del raw_list[raw_list.index('ing')]
-        if 'ness' in raw_list:
-            del raw_list[raw_list.index('ness')]
-    elif word == candidate:
-        # word is the same as candidate
-        pass
+        raw_list.extend(candidate.split('-'))
     else:
-        raw_list = [candidate]
-
+        raw_list= [candidate]
+    
+    for term in raw_list:
+        if word in term:
+            raw_list.append(term.replace(word,''))
+            del raw_list[raw_list.index(term)]
     for term in raw_list:
         if "'" in term:
             temp = term.replace("'", '')
             raw_list.append(temp)
             del raw_list[raw_list.index(term)]
     for term in raw_list:
-        if len(term) is 1:
+        if len(term) <= 2:
             del raw_list[raw_list.index(term)]
+    
+    if 'age' in raw_list:
+        del raw_list[raw_list.index('age')]
+    if 'ing' in raw_list:
+        del raw_list[raw_list.index('ing')]
+    if 'ness' in raw_list:
+        del raw_list[raw_list.index('ness')]
 
     for filler in fillers:
         while filler in raw_list:
             del raw_list[raw_list.index(filler)]
+    
     return raw_list
+
+def build_link_entry(word, synset_id, word_type, ranking, antonym = False):
+    link_entry = {'link': word,
+                  'synset': synset_id,
+                  'type': word_type,
+                  'source': 'wordnet',
+                  'ranking': ranking,
+                  'hits': 0,
+                  'attempts': 0,
+                  'score': 1,
+                  'antonym': antonym}
+    return link_entry
 
 def collect_link_data(src_collection, word):
     # returns data from wordnet collection
@@ -130,15 +136,7 @@ def collect_link_data(src_collection, word):
                     lemma_word = lemma['lemma']
                     for term in clean_links(word, lemma_word): 
                         if term and term not in word_list:
-                            link_dict = {'link': term,
-                                         'synset': synset['id'],
-                                         'type': word_type,
-                                         'source': 'wordnet',
-                                         'ranking': ranking,
-                                         'hits': 0,
-                                         'attempts': 0,
-                                         'score': 0,
-                                         'antonym': False}
+                            link_dict = build_link_entry(term, synset['id'], word_type, ranking)
                             ranking += 1
                             word_list.append(term)
                             link_list.append(link_dict)
@@ -147,15 +145,7 @@ def collect_link_data(src_collection, word):
                         for ant in lemma['antonyms']:
                             for term in clean_links(word, ant):
                                 if term and term not in word_list:
-                                    link_dict = {'link': term,
-                                                 'synset': synset['id'],
-                                                 'type': word_type,
-                                                 'source': 'wordnet',
-                                                 'ranking': ranking,
-                                                 'hits': 0,
-                                                 'attempts': 0,
-                                                 'score': 0,
-                                                 'antonym': True}
+                                    link_dict = build_link_entry(term, synset['id'], word_type, ranking, antonym=True)
                                     ranking += 1
                                     word_list.append(term)
                                     link_list.append(link_dict)
@@ -164,15 +154,7 @@ def collect_link_data(src_collection, word):
                     for hypo in synset['hyponyms']:
                         for term in clean_links(word, hypo):
                             if term and term not in word_list:
-                                link_dict = {'link': term,
-                                             'synset': synset['id'],
-                                             'type': word_type,
-                                             'source': 'wordnet',
-                                             'ranking': ranking,
-                                             'hits': 0,
-                                             'attempts': 0,
-                                             'score': 0,
-                                             'antonym': False}
+                                link_dict = build_link_entry(term, synset['id'], word_type, ranking)
                                 ranking += 1
                                 word_list.append(term)
                                 link_list.append(link_dict)
@@ -181,15 +163,7 @@ def collect_link_data(src_collection, word):
                     for hyper in synset['hypernyms']:
                         for term in clean_links(word, hyper):
                             if term and term not in word_list:
-                                link_dict = {'link': term,
-                                             'synset': synset['id'],
-                                             'type': word_type,
-                                             'source': 'wordnet',
-                                             'ranking': ranking,
-                                             'hits': 0,
-                                             'attempts': 0,
-                                             'score': 0,
-                                             'antonym': False}
+                                link_dict = build_link_entry(term, synset['id'], word_type, ranking)
                                 ranking += 1
                                 word_list.append(term)
                                 link_list.append(link_dict)
@@ -202,18 +176,12 @@ def collect_link_data(src_collection, word):
                     definition = definition.replace(')', '')
                     definition = definition.replace(',', '')
                     definition = definition.replace(';', '')
+                    # remove digits:
+                    definition = ''.join([i for i in definition if not i.isdigit()])
                     for def_word in definition.split():
                         for term in clean_links(word, def_word, is_definition=True):
                             if term and term not in word_list:
-                                link_dict = {'link': term,
-                                             'synset': synset['id'],
-                                             'type': word_type,
-                                             'source': 'wordnet',
-                                             'ranking': ranking,
-                                             'hits': 0,
-                                             'attempts': 0,
-                                             'score': 0,
-                                             'antonym': False}
+                                link_dict = build_link_entry(term, synset['id'], word_type, ranking)
                                 ranking += 1
                                 word_list.append(term)
                                 link_list.append(link_dict)
@@ -228,8 +196,7 @@ def collect_link_data(src_collection, word):
 def aggregate_links(src_collection, dest_collection, word):
     # links = {'word': word}
     # is word present in destination collection?
-    entries = dest_collection.count_documents({'word':word})
-    if entries:
+    if dest_collection.count_documents({'word':word}):
         entry = dest_collection.find_one({'word':word})
         # for word in entry['links']:
             # print(f"Link word: {word['link']}")
@@ -263,8 +230,12 @@ hints_collection = db['hints']
         # links = aggregate_links(wordnet_collection, links_collection, k)
         # pprint(links)
 
-# test_list = ['light', 'school', 'sun', 'dad', 'acre', 'world', 'trip', 'punk', 'mom', 'ice', 'rib']
-test_list = ['rib']
+# test_list = ['light', 'school', 'sun', 'dad', 'acre', 'world',
+#              'trip', 'punk', 'mom', 'ice', 'rib', 'pomp', 'music',
+#              'macho', 'jump', 'fringe', 'dust', 'brave', 'clown',
+#              'eureka', 'game', 'goodbye', 'hedge', 'letter', 'job',
+#              'twins', 'space']
+test_list = ['space']
 for test_word in test_list:
     print(f"Links for {test_word}:")
     hints = aggregate_links(wordnet_collection, hints_collection, test_word)
