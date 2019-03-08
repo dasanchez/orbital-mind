@@ -3,10 +3,13 @@ wn_linker.py
 generates ranked list of links for each word in the database
 """
 import random
+import difflib
+import distance
 from pprint import pprint
 from pymongo import MongoClient
 
 word_count = 16
+threshold = 0.5
 
 def generate_word_dict(word_set):
     # pick random words
@@ -57,7 +60,7 @@ def clean_links(word, candidate, is_definition = False):
                         'high', 'low', 'other', 'around', 'do', 'needed', 'during', 'usually',
                         'but', 'term', 'probably', 'derived', 'not', 'this', 'concern', 'being',
                         'designed', 'example', 'answering', 'performing', 'closely', 'strictly',
-                        'either', 'while', 'bring', 'put'])
+                        'either', 'while', 'bring', 'put', 'above', 'below'])
 
     raw_list = []
     word = word.lower()
@@ -82,6 +85,11 @@ def clean_links(word, candidate, is_definition = False):
         if "'" in term:
             temp = term.replace("'", '')
             raw_list.append(temp)
+            del raw_list[raw_list.index(term)]
+    for term in raw_list:
+        # if (1-distance.jaccard(word, term)+0.005*len(term)) < threshold:
+        if difflib.SequenceMatcher(None, word, term).ratio() > threshold:
+            print(f"Skipping '{term}'.")
             del raw_list[raw_list.index(term)]
     for term in raw_list:
         if len(term) <= 2:
@@ -236,6 +244,7 @@ hints_collection = db['hints']
 #              'eureka', 'game', 'goodbye', 'hedge', 'letter', 'job',
 #              'twins', 'space']
 test_list = ['space']
+threshold = 0.45
 for test_word in test_list:
     print(f"Links for {test_word}:")
     hints = aggregate_links(wordnet_collection, hints_collection, test_word)
