@@ -60,7 +60,7 @@ def clean_links(word, candidate, is_definition = False):
                         'high', 'low', 'other', 'around', 'do', 'needed', 'during', 'usually',
                         'but', 'term', 'probably', 'derived', 'not', 'this', 'concern', 'being',
                         'designed', 'example', 'answering', 'performing', 'closely', 'strictly',
-                        'either', 'while', 'bring', 'put', 'above', 'below', 'its'])
+                        'either', 'while', 'bring', 'put', 'above', 'below', 'its', 'etc'])
 
     raw_list = []
     word = word.lower()
@@ -74,6 +74,8 @@ def clean_links(word, candidate, is_definition = False):
                 del raw_list[raw_list.index(term)]
     elif '-' in candidate:
         raw_list.extend(candidate.split('-'))
+    elif ':' in candidate:
+        raw_list.extend(candidate.split(':'))
     else:
         raw_list= [candidate]
     
@@ -100,11 +102,11 @@ def clean_links(word, candidate, is_definition = False):
             temp = term.replace('`', '')
             raw_list.append(temp)
             del raw_list[raw_list.index(term)]
-    for term in raw_list:
-        if (1-distance.sorensen(word, term)) > threshold:
-        # if difflib.SequenceMatcher(None, word, term).ratio() > threshold:
-            print(f"Skipping '{term}'.")
-            del raw_list[raw_list.index(term)]
+    # for term in raw_list:
+    #     if (1-distance.sorensen(word, term)) > threshold:
+    #     # if difflib.SequenceMatcher(None, word, term).ratio() > threshold:
+    #         print(f"Skipping '{term}'.")
+    #         del raw_list[raw_list.index(term)]
     for term in raw_list:
         if len(term) <= 2:
             del raw_list[raw_list.index(term)]
@@ -198,6 +200,7 @@ def collect_link_data(src_collection, word):
                     definition = definition.replace(')', '')
                     definition = definition.replace(',', '')
                     definition = definition.replace(';', '')
+                    definition = definition.replace(':', '')
                     # remove digits:
                     definition = ''.join([i for i in definition if not i.isdigit()])
                     for def_word in definition.split():
@@ -256,8 +259,8 @@ hints_collection = db['hints']
 #              'trip', 'punk', 'mom', 'ice', 'rib', 'pomp', 'music',
 #              'macho', 'jump', 'fringe', 'dust', 'brave', 'clown',
 #              'eureka', 'game', 'goodbye', 'hedge', 'letter', 'job',
-#              'twins', 'space']
-test_list = ['set']
+#              'twins', 'space', 'ice']
+test_list = ['icy']
 threshold = 0.8
 for test_word in test_list:
     print(f"Links for {test_word}:")
