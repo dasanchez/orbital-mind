@@ -40,6 +40,7 @@ The goal is to produce a bot able to generate a hint based on a list of words, s
   - mom: ma, mum, mummy, mommy > mother
   - macho: machismo > masculine
   - dad: daddy, dada > father, papa
+  - game: gamy
 - Samples words: school, sun, freight
 - [ ] Hints are presented to the user in order to get a ranking or to be removed.
 - [ ] User provides additional links if possible and assigns a ranking.

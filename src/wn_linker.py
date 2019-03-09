@@ -60,7 +60,7 @@ def clean_links(word, candidate, is_definition = False):
                         'high', 'low', 'other', 'around', 'do', 'needed', 'during', 'usually',
                         'but', 'term', 'probably', 'derived', 'not', 'this', 'concern', 'being',
                         'designed', 'example', 'answering', 'performing', 'closely', 'strictly',
-                        'either', 'while', 'bring', 'put', 'above', 'below'])
+                        'either', 'while', 'bring', 'put', 'above', 'below', 'its'])
 
     raw_list = []
     word = word.lower()
@@ -82,13 +82,27 @@ def clean_links(word, candidate, is_definition = False):
             raw_list.append(term.replace(word,''))
             del raw_list[raw_list.index(term)]
     for term in raw_list:
+        if len(word) > 3 and word[:-1] in term:
+            print(f"Removing {term}")
+            del raw_list[raw_list.index(term)]
+    for term in raw_list:
         if "'" in term:
             temp = term.replace("'", '')
             raw_list.append(temp)
             del raw_list[raw_list.index(term)]
     for term in raw_list:
-        # if (1-distance.jaccard(word, term)+0.005*len(term)) < threshold:
-        if difflib.SequenceMatcher(None, word, term).ratio() > threshold:
+        if '"' in term:
+            temp = term.replace('"', '')
+            raw_list.append(temp)
+            del raw_list[raw_list.index(term)]
+    for term in raw_list:
+        if '`' in term:
+            temp = term.replace('`', '')
+            raw_list.append(temp)
+            del raw_list[raw_list.index(term)]
+    for term in raw_list:
+        if (1-distance.sorensen(word, term)) > threshold:
+        # if difflib.SequenceMatcher(None, word, term).ratio() > threshold:
             print(f"Skipping '{term}'.")
             del raw_list[raw_list.index(term)]
     for term in raw_list:
@@ -243,8 +257,8 @@ hints_collection = db['hints']
 #              'macho', 'jump', 'fringe', 'dust', 'brave', 'clown',
 #              'eureka', 'game', 'goodbye', 'hedge', 'letter', 'job',
 #              'twins', 'space']
-test_list = ['space']
-threshold = 0.45
+test_list = ['set']
+threshold = 0.8
 for test_word in test_list:
     print(f"Links for {test_word}:")
     hints = aggregate_links(wordnet_collection, hints_collection, test_word)
