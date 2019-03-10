@@ -61,8 +61,9 @@ db = client['orbital-db']
 synset_collection = db['synsets']
 
 # collect WordNet data
-wordfile = open("src/or_words.txt", 'r')
-words = [line.strip().lower() for line in wordfile]
+# wordfile = open("src/or_words.txt", 'r')
+# words = [line.strip().lower() for line in wordfile]
+words = ['icy']
 
 eval_types = ['n', 'v', 'a', 'r']
 new_words = 0

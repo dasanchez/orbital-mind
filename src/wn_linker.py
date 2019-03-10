@@ -329,9 +329,9 @@ threshold = 0.8
 for test_word in test_list:
     print(f"Links for {test_word}:")
     hints = aggregate_links(wordnet_collection, hints_collection, test_word)
-    # if hints:
-    #     for link in hints['links']:
-    #         if link['antonym']:
-    #             print(f"{link['link']} (antonym)")
-    #         else:
-    #             print(link['link'])
+    if hints:
+        for link in hints['links']:
+            if link['antonym']:
+                print(f"{link['link']} (antonym)")
+            else:
+                print(link['link'])
