@@ -36,11 +36,21 @@ The goal is to produce a bot able to generate a hint based on a list of words, s
         }
     ]
 }
-- [ ] Reject words that are too similar:
+- [x] Reject words that are too similar:
   - mom: ma, mum, mummy, mommy > mother
   - macho: machismo > masculine
   - dad: daddy, dada > father, papa
   - game: gamy
 - Samples words: school, sun, freight
+- Assess:
+  - [ ] "password" results in "watchword"
+  - [ ] "wax" results in "bayberry"
+  - [ ] "sash" results in "window"
+  - [ ] "squint" results in "strabismus"
+  - [ ] "shipwreck" results in "ship"
+  - [ ] "lifestyle" results in "life"
+  - [ ] "archaeologist" results in "archeologist"
+  - [ ] "loyalty" results in "dis" (as in, disloyalty)
+  - [ ] "gray" results in "grey"
 - [ ] Hints are presented to the user in order to get a ranking or to be removed.
 - [ ] User provides additional links if possible and assigns a ranking.

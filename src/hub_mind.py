@@ -2,6 +2,8 @@ import asyncio
 import websockets
 import json
 from pprint import pprint
+from pymongo import MongoClient
+import wn_linker
 
 class HubMind:
     """ Orbital-playing bot that plays as hub."""
@@ -11,8 +13,13 @@ class HubMind:
         self.sectors = dict()
         self.keywords = dict()
         self.words = dict()
+        self.remaining_words = list()
         self.team = ''
         self.websocket = websocket
+        self.mongo_client = MongoClient()
+        self.db = self.mongo_client['orbital-db']
+        self.synsets_collection = self.db['synsets']
+        self.links_collection = self.db['links']
 
     async def respond_to_hint(self, word):
         """ Approve all hints for now. """
@@ -21,8 +28,21 @@ class HubMind:
         await self.websocket.send(packet)
 
     async def submit_hint(self):
-        """ Only send "testword" for now. """
-        packet = {'type': 'hint', 'hint': 'testword', 'guesses': 1}
+        """ Send a hint to match a single keyword. """
+        # Find a word that has not been guessed yet.
+        word_to_match = self.remaining_words[0]
+        print(f"Looking for a hint for {word_to_match}")
+
+        # Gather list of links first
+        links = wn_linker.aggregate_links(self.synsets_collection, self.links_collection, word_to_match)
+        if links['links']:
+            print("Found the following links:")
+            pprint(links)
+            hint = links['links'][0]['link']
+        else:
+            print("No links found.")
+            hint = "testword"    
+        packet = {'type': 'hint', 'hint': hint, 'guesses': 1}
         packet = json.dumps(packet)
         await self.websocket.send(packet)
 
@@ -69,10 +89,17 @@ class HubMind:
             print("Ready signal accepted.")
         elif msg['type'] == 'state' and msg['state'] == 'game-start':
             self.status = 'game-start'
+            # Clear words and keywords
+            self.keywords.clear()
+            self.words.clear
+            self.remaining_words.clear()
             print("Game has started.")
         elif msg['type'] == 'keys':
             for word in msg['keywords']:
                 self.keywords[word['word']] = word['team']
+            for k,v in self.keywords.items():
+                if v == self.team:
+                    self.remaining_words.append(k)
             print("Keywords:")
             pprint(self.keywords)
         elif  msg['type'] == 'words':
@@ -102,6 +129,9 @@ class HubMind:
         elif msg['type'] == 'replay-ack':
             self.status = 'replay-ready'
             print("Replay signal acknowledged.")
+        elif msg['type'] == 'guess':
+            if msg['word'] in self.remaining_words:
+                self.remaining_words.remove(msg['word'])
         elif msg['type'] == 'time':
             pass
         else:

@@ -14,7 +14,6 @@ async def loop_start(uri):
             await mind.message_handler(msg)
 
 if __name__ == "__main__":
-    # asyncio.get_event_loop().run_until_complete(
     asyncio.get_event_loop().run_until_complete(
         loop_start('ws://localhost:9001'))
     # hub_mind('ws://localhost:9001')

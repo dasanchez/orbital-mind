@@ -296,7 +296,7 @@ def aggregate_links(src_collection, dest_collection, word):
         # read  data from wordnet
         print("Word not present in hints collection, reading from synsets one...")
         links = collect_link_data(src_collection, word)
-        # dest_collection.insert_one(links)
+        dest_collection.insert_one(links)
         return links
 
 # read words in
@@ -306,12 +306,12 @@ def aggregate_links(src_collection, dest_collection, word):
 # word_dict = generate_word_dict(word_set)
 # pprint(word_dict)
 
-client = MongoClient()
+# client = MongoClient()
 # open database
-db = client['orbital-db']
+# db = client['orbital-db']
 # source database:
-wordnet_collection = db['synsets']
-hints_collection = db['hints']
+# wordnet_collection = db['synsets']
+# links_collection = db['hints']
 
 # for k,v in word_dict.items():
     # if v is 'yes':
@@ -324,14 +324,15 @@ hints_collection = db['hints']
 #              'macho', 'jump', 'fringe', 'dust', 'brave', 'clown',
 #              'eureka', 'game', 'goodbye', 'hedge', 'letter', 'job',
 #              'twins', 'space', 'ice']
-test_list = ['mom']
-threshold = 0.8
-for test_word in test_list:
-    print(f"Links for {test_word}:")
-    hints = aggregate_links(wordnet_collection, hints_collection, test_word)
-    if hints:
-        for link in hints['links']:
-            if link['antonym']:
-                print(f"{link['link']} (antonym)")
-            else:
-                print(link['link'])
+
+# test_list = ['mom']
+# threshold = 0.8
+# for test_word in test_list:
+#     print(f"Links for {test_word}:")
+#     hints = aggregate_links(wordnet_collection, links_collection, test_word)
+#     if hints:
+#         for link in hints['links']:
+#             if link['antonym']:
+#                 print(f"{link['link']} (antonym)")
+#             else:
+#                 print(link['link'])
