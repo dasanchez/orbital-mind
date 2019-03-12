@@ -41,16 +41,47 @@ The goal is to produce a bot able to generate a hint based on a list of words, s
   - macho: machismo > masculine
   - dad: daddy, dada > father, papa
   - game: gamy
-- Samples words: school, sun, freight
-- Assess:
-  - [ ] "password" results in "watchword"
-  - [ ] "wax" results in "bayberry"
-  - [ ] "sash" results in "window"
-  - [ ] "squint" results in "strabismus"
-  - [ ] "shipwreck" results in "ship"
-  - [ ] "lifestyle" results in "life"
-  - [ ] "archaeologist" results in "archeologist"
-  - [ ] "loyalty" results in "dis" (as in, disloyalty)
-  - [ ] "gray" results in "grey"
+- [ ] Assess and address
+  - [X] "password" results in "watchword".
+
+    I would reject this, because "word" is present in both.
+  
+  - [X] "wax" results in "bayberry"
+  
+    I would accept this.
+  
+  - [X] "sash" results in "window"
+  
+    I would accept this.
+  
+  - [X] "squint" results in "strabismus"
+  
+    I would accept this.
+
+  - [X] "shipwreck" results in "ship"
+
+    I would reject this, because "ship" matches the **beginning** of the word to match.
+
+  - [X] "lifestyle" results in "life"
+
+    I would reject this, because "life" matches the **beginning** of the word to match.
+
+  - [X] "archaeologist" results in "archeologist"
+
+    I would reject this, because there is a one-letter difference between two long (>10 letters) words.
+
+  - [X] "loyalty" results in "dis" (as in, disloyalty)
+
+    I would accept this.
+
+  - [X] "gray" results in "grey"
+
+    I would reject this, because only one vowel in two four-letter words is different.
+
+  - [ ] "chew" results in "chaw"
+
+    I would reject this, because only one vowel in two four-letter words is different.
+
+  - [ ] "bobsled" results in "short" - but there is a SHORT in the word board already
 - [ ] Hints are presented to the user in order to get a ranking or to be removed.
 - [ ] User provides additional links if possible and assigns a ranking.
