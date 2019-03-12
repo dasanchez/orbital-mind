@@ -15,11 +15,65 @@ class HubMind:
         self.words = dict()
         self.remaining_words = list()
         self.team = ''
+        self.hint = ''
+        self.target = ''
         self.websocket = websocket
         self.mongo_client = MongoClient()
         self.db = self.mongo_client['orbital-db']
         self.synsets_collection = self.db['synsets']
         self.links_collection = self.db['links']
+
+    def update_rankings(self, links):
+        # links = sorted(links, key=lambda k: k['score'], reverse=True)
+        # pprint(ranked_links)
+        return sorted(links, key=lambda k: k['score'], reverse=True)
+
+    def hint_rejected(self):
+        word_entry = self.links_collection.find_one({'word':self.target.lower()})
+        if word_entry:
+            link_entries = word_entry['links']
+            for entry in link_entries:
+                if entry.get('link') == self.hint:
+                    print(f"Word {self.hint} rejected, updating database entry.")
+                    entry['attempts'] = entry['attempts'] + 10
+                    if entry['hits'] / entry['attempts'] == 0: # give all words a chance
+                        entry['score'] = 0.1
+                    else:
+                        entry['score'] = entry['hits'] / entry['attempts']
+                    break
+            word_entry['links'] = self.update_rankings(link_entries)
+            self.links_collection.update({'word':self.target.lower()}, word_entry)
+
+    def hint_failure(self):
+        print("Hint failed")
+        word_entry = self.links_collection.find_one({'word':self.target.lower()})
+        if word_entry:
+            link_entries = word_entry['links']
+            for entry in link_entries:
+                if entry.get('link') == self.hint:
+                    print(f"Word {self.hint} missed, updating database entry.")
+                    entry['attempts'] = entry['attempts'] + 1
+                    if entry['hits'] / entry['attempts'] == 0: # give all words a chance
+                        entry['score'] = 0.1
+                    else:
+                        entry['score'] = entry['hits'] / entry['attempts']
+                    break
+            word_entry['links'] = self.update_rankings(link_entries)
+            self.links_collection.update({'word':self.target.lower()}, word_entry)
+
+    def hint_success(self):
+        word_entry = self.links_collection.find_one({'word':self.target.lower()})
+        if word_entry:
+            link_entries = word_entry['links']
+            for entry in link_entries:
+                if entry.get('link') == self.hint:
+                    print(f"Word {self.hint} accepted, updating database entry.")
+                    entry['attempts'] = entry['attempts'] + 1
+                    entry['hits'] = entry['hits'] + 1
+                    entry['score'] = entry['hits'] / entry['attempts']
+                    break
+            word_entry['links'] = self.update_rankings(link_entries)
+            self.links_collection.update({'word':self.target.lower()}, word_entry)
 
     async def respond_to_hint(self, word):
         """ Approve all hints for now. """
@@ -30,19 +84,22 @@ class HubMind:
     async def submit_hint(self):
         """ Send a hint to match a single keyword. """
         # Find a word that has not been guessed yet.
-        word_to_match = self.remaining_words[0]
-        print(f"Looking for a hint for {word_to_match}")
-
+        self.target = self.remaining_words[0]
+        print(f"Looking for a hint for {self.target}")
+        
         # Gather list of links first
-        links = wn_linker.aggregate_links(self.synsets_collection, self.links_collection, word_to_match)
+        links = wn_linker.aggregate_links(self.synsets_collection, self.links_collection, self.target.lower())
         if links['links']:
             print("Found the following links:")
-            pprint(links)
-            hint = links['links'][0]['link']
+            if len(links['links']) >= 5:
+                pprint(links['links'][:5])
+            else:
+                pprint(links['links'])
+            self.hint = links['links'][0]['link']
         else:
             print("No links found.")
-            hint = "testword"    
-        packet = {'type': 'hint', 'hint': hint, 'guesses': 1}
+            self.hint = "testword"    
+        packet = {'type': 'hint', 'hint': self.hint, 'guesses': 1}
         packet = json.dumps(packet)
         await self.websocket.send(packet)
 
@@ -130,8 +187,22 @@ class HubMind:
             self.status = 'replay-ready'
             print("Replay signal acknowledged.")
         elif msg['type'] == 'guess':
+            print(msg)
+            # did someone from our team guess?
+            if msg['guesserTeam'] == self.team:
+                # is it the word we wanted?
+                if msg['word'] == self.target:
+                    # update the ranking for our hint!
+                    self.hint_success()
+                else:
+                    # no, some other word got guessed
+                    self.hint_failure()
             if msg['word'] in self.remaining_words:
                 self.remaining_words.remove(msg['word'])
+        elif msg['type'] == 'msg' and 'REJECTED' in msg['msg']:
+            # was our hint rejected?
+            if self.team != msg['team']:
+                self.hint_rejected()
         elif msg['type'] == 'time':
             pass
         else:

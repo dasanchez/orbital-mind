@@ -184,7 +184,7 @@ def build_link_entry(word, synset_id, word_type, ranking, antonym = False):
                   'ranking': ranking,
                   'hits': 0,
                   'attempts': 0,
-                  'score': 1,
+                  'score': 0.5,
                   'antonym': antonym}
     return link_entry
 
@@ -311,7 +311,7 @@ def aggregate_links(src_collection, dest_collection, word):
 # db = client['orbital-db']
 # source database:
 # wordnet_collection = db['synsets']
-# links_collection = db['hints']
+# links_collection = db['links']
 
 # for k,v in word_dict.items():
     # if v is 'yes':
@@ -330,9 +330,9 @@ def aggregate_links(src_collection, dest_collection, word):
 # for test_word in test_list:
 #     print(f"Links for {test_word}:")
 #     hints = aggregate_links(wordnet_collection, links_collection, test_word)
-#     if hints:
-#         for link in hints['links']:
-#             if link['antonym']:
-#                 print(f"{link['link']} (antonym)")
-#             else:
-#                 print(link['link'])
+    # if hints:
+    #     for link in hints['links']:
+    #         if link['antonym']:
+    #             print(f"{link['link']} (antonym)")
+    #         else:
+    #             print(link['link'])
