@@ -78,13 +78,29 @@ The goal is to produce a bot able to generate a hint based on a list of words, s
 
     I would reject this, because only one vowel in two four-letter words is different.
 
-  - [ ] "chew" results in "chaw"
+  - [X] "chew" results in "chaw"
 
     I would reject this, because only one vowel in two four-letter words is different.
 
-  - [ ] "bobsled" results in "short" - but there is a SHORT in the word board already
+  - [X] "bobsled" results in "short" - but there is a SHORT in the word board already
 
     I would reject this, because of an exact match.
 
-- [ ] Hints are presented to the user in order to get a ranking or to be removed.
+  - [X] "water" results in "h20"
+
+    I would reject this, because numbers are not allowed.
+
+  - [X] "recycle" results in "cycle"
+
+    I would reject this, because cycle represents  5/7 letters in recycle
+
+  - [X] "repeat" results in "recycle"
+
+    I would accept this.
+
+  - [X] "photograph" results in "photo"
+
+    I would reject this, because photograph **starts** with photo.
+
+  - [ ] Hints are presented to the user in order to get a ranking or to be removed.
 - [ ] User provides additional links if possible and assigns a ranking.
