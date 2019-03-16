@@ -43,64 +43,44 @@ The goal is to produce a bot able to generate a hint based on a list of words, s
   - game: gamy
 - [ ] Assess and address
   - [X] "password" results in "watchword".
-
-    I would reject this, because "word" is present in both.
-  
+    - Reject: "word" is present in both.
+    - Handled.
   - [X] "wax" results in "bayberry"
-  
-    I would accept this.
-  
+    - Accept.
   - [X] "sash" results in "window"
-  
-    I would accept this.
-  
+    - Accept.
   - [X] "squint" results in "strabismus"
-  
-    I would accept this.
-
+    - Accept.
   - [X] "shipwreck" results in "ship"
-
-    I would reject this, because "ship" matches the **beginning** of the word to match.
-
+    - Reject: "ship" matches the **beginning** of the word to match.
+    - Handled.
   - [X] "lifestyle" results in "life"
-
-    I would reject this, because "life" matches the **beginning** of the word to match.
-
+    - Reject: "life" matches the **beginning** of the word to match.
+    - Handled.
   - [X] "archaeologist" results in "archeologist"
-
-    I would reject this, because there is a one-letter difference between two long (>10 letters) words.
-
+    - Reject: there is a one-letter difference between two long (>10 letters) words.
+    - Handled.
   - [X] "loyalty" results in "dis" (as in, disloyalty)
-
-    I would accept this.
-
+    - Accept.
   - [X] "gray" results in "grey"
-
-    I would reject this, because only one vowel in two four-letter words is different.
-
+    - Reject: only one vowel in two four-letter words is different.
+    - Handled.
   - [X] "chew" results in "chaw"
-
-    I would reject this, because only one vowel in two four-letter words is different.
-
+    - Reject: only one vowel in two four-letter words is different.
+    - Handled.
   - [X] "bobsled" results in "short" - but there is a SHORT in the word board already
-
-    I would reject this, because of an exact match.
-
+    - Reject this, because of an exact match.
   - [X] "water" results in "h20"
-
-    I would reject this, because numbers are not allowed.
-
+    - Reject: numbers are not allowed.
+    - Handled.
   - [X] "recycle" results in "cycle"
-
-    I would reject this, because cycle represents  5/7 letters in recycle
-
+    - Reject: because cycle represents 5/7 letters in recycle
+    - Handled.
   - [X] "repeat" results in "recycle"
-
-    I would accept this.
-
+    - Accept.
   - [X] "photograph" results in "photo"
-
-    I would reject this, because photograph **starts** with photo.
+    - Reject: photograph **starts** with photo.
+    - Handled.
 
   - [ ] Hints are presented to the user in order to get a ranking or to be removed.
 - [ ] User provides additional links if possible and assigns a ranking.

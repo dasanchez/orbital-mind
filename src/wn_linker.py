@@ -51,6 +51,15 @@ def dumb_filter(word1, word2):
         return False    
     return True
 
+def consonant_filter(word1, word2):
+    vowels = {'a', 'e', 'i', 'o', 'u'}
+    word1_cons = ''.join([letter for letter in word1 if letter not in vowels])
+    word2_cons = ''.join([letter for letter in word2 if letter not in vowels])
+    if word1_cons == word2_cons:
+        return False
+    else:
+        return True
+
 def clean_links(word, candidate, is_definition = False):
     # build list of acceptable candidates
     fillers = ['a', 'an', 'or', 'with', 'or', 'to', 'for', 'of',
@@ -72,7 +81,7 @@ def clean_links(word, candidate, is_definition = False):
                         'but', 'term', 'probably', 'derived', 'not', 'this', 'concern', 'being',
                         'designed', 'example', 'answering', 'performing', 'closely', 'strictly',
                         'either', 'while', 'bring', 'put', 'above', 'below', 'its', 'etc',
-                        'formerly', 'their'])
+                        'formerly', 'their', 'he', 'she', 'is', 'was'])
 
     raw_list = []
     word = word.lower()
@@ -129,6 +138,8 @@ def clean_links(word, candidate, is_definition = False):
         del raw_list[raw_list.index('ing')]
     if 'ness' in raw_list:
         del raw_list[raw_list.index('ness')]
+    if 'ish' in raw_list:
+        del raw_list[raw_list.index('ish')]
 
     for filler in fillers:
         while filler in raw_list:
@@ -145,12 +156,19 @@ def clean_links(word, candidate, is_definition = False):
             filtered_words.append(term)
             del raw_list[raw_list.index(term)]
     
+    # remove numbers
     for term in raw_list:
         for character in term:
             if character.isdigit():
                 del raw_list[raw_list.index(term)]
                 break
     
+    # no-vowel-filter
+    for term in raw_list:
+        if not consonant_filter(word, term):
+            print(f"Consonant filter removed '{term}'.")
+            del raw_list[raw_list.index(term)]
+
     return raw_list, filtered_words
 
 def build_link_entry(word, synset_id, word_type, ranking, antonym = False):
@@ -355,7 +373,7 @@ def aggregate_links(src_collection, dest_collection, word):
         # read  data from wordnet
         print("Word not present in hints collection, reading from synsets one...")
         links = collect_link_data(src_collection, word)
-        dest_collection.insert_one(links)
+        # dest_collection.insert_one(links)
         return links
 
 # read words in
@@ -384,7 +402,7 @@ links_collection = db['links']
 #              'eureka', 'game', 'goodbye', 'hedge', 'letter', 'job',
 #              'twins', 'space', 'ice']
 
-test_list = ['archeologist']
+test_list = ['grey']
 # threshold = 0.8
 for test_word in test_list:
     hints = aggregate_links(wordnet_collection, links_collection, test_word)
