@@ -47,7 +47,7 @@ def dumb_filter(word1, word2):
     """
     # Filter 1:
     # Shipwreck / ship
-    if word1 in word2 or word2 in word1:
+    if (word1 in word2 or word2 in word1) and (len(word1)>3 and len(word2) > 3):
         return False    
     return True
 
@@ -81,7 +81,7 @@ def clean_links(word, candidate, is_definition = False):
                         'but', 'term', 'probably', 'derived', 'not', 'this', 'concern', 'being',
                         'designed', 'example', 'answering', 'performing', 'closely', 'strictly',
                         'either', 'while', 'bring', 'put', 'above', 'below', 'its', 'etc',
-                        'formerly', 'their', 'he', 'she', 'is', 'was'])
+                        'formerly', 'their', 'he', 'she', 'is', 'was', 'someone'])
 
     raw_list = []
     word = word.lower()
@@ -101,8 +101,11 @@ def clean_links(word, candidate, is_definition = False):
         raw_list= [candidate]
     
     for term in raw_list:
-        if word in term:
-            raw_list.append(term.replace(word,''))
+        if word in term and len(word) > 3:
+            # BUG: only do the append if term begins or ends with word
+            # Otherwise flu leads to "inenza"
+            if word.startswith(term) or word.endswith(term):
+                raw_list.append(term.replace(word,''))
             del raw_list[raw_list.index(term)]
     for term in raw_list:
         if len(word) > 3 and word[:-1] in term:
@@ -373,7 +376,7 @@ def aggregate_links(src_collection, dest_collection, word):
         # read  data from wordnet
         print("Word not present in hints collection, reading from synsets one...")
         links = collect_link_data(src_collection, word)
-        # dest_collection.insert_one(links)
+        dest_collection.insert_one(links)
         return links
 
 # read words in
@@ -402,8 +405,7 @@ links_collection = db['links']
 #              'eureka', 'game', 'goodbye', 'hedge', 'letter', 'job',
 #              'twins', 'space', 'ice']
 
-test_list = ['grey']
-# threshold = 0.8
+test_list = ['flu']
 for test_word in test_list:
     hints = aggregate_links(wordnet_collection, links_collection, test_word)
     if hints:

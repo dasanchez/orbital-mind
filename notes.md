@@ -81,6 +81,11 @@ The goal is to produce a bot able to generate a hint based on a list of words, s
   - [X] "photograph" results in "photo"
     - Reject: photograph **starts** with photo.
     - Handled.
+  - [ ] "computer" results  in "computing"
+    - Reject: if we remove "ing", "comput" is found in "computer"
+  - [ ] "cowboy" results in "cowpuncher"
+  - [ ] "flu" resuls in "inenza"
+    - BUG: flu is being removed from "influenza"
 
   - [ ] Hints are presented to the user in order to get a ranking or to be removed.
 - [ ] User provides additional links if possible and assigns a ranking.

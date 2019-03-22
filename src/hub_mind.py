@@ -1,3 +1,4 @@
+import random
 import asyncio
 import websockets
 import json
@@ -22,6 +23,14 @@ class HubMind:
         self.db = self.mongo_client['orbital-db']
         self.synsets_collection = self.db['synsets']
         self.links_collection = self.db['links']
+        self.hub_names = ['So Much for  Subtlety',
+                          'Dressed Up To Party',
+                          'Fixed Grin',
+                          'Now We Try It My Way',
+                          'Conventional Wisdom',
+                          'Determinist',
+                          'Flexible  Demeanour',
+                          'Use Psychology']
 
     def update_rankings(self, links):
         # links = sorted(links, key=lambda k: k['score'], reverse=True)
@@ -212,7 +221,8 @@ class HubMind:
         if self.status == 'connected':
             # send name
             print(f"Requesting name.")
-            packet = {'type': 'name-request', 'name':'So Much for Subtlety'}
+            random_name = random.randint(0, 7)
+            packet = {'type': 'name-request', 'name':self.hub_names[random_name]}
             packet = json.dumps(packet)
             await self.websocket.send(packet)
         elif self.status == 'name-accepted':
